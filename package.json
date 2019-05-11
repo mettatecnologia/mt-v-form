@@ -1,0 +1,24 @@
+{
+  "name": "jb-v-form",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbmchd/jb-v-form.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jbmchd/jb-v-form/issues"
+  },
+  "homepage": "https://github.com/jbmchd/jb-v-form#readme",
+  "dependencies": {
+    "jb-v-alerta": "1.0.0",
+    "jb-v-plugin-global": "1.0.0"
+  }
+}

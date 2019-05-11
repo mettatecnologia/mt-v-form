@@ -1,1 +1,1 @@
-Vue.component('jb-v-form', require('./JbForm.vue').default);
+Vue.component('jb-form', require('./JbForm.vue').default);

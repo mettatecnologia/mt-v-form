@@ -1,14 +1,14 @@
 <template>
     <div>
         <slot name="mensagens">
-            <jb-alerta v-model="messages" :tipo="mensagensTipo" :tooltip="mensagensDetalhes" />
+            <jb-alert v-model="messages" :tipo="mensagensTipo" :tooltip="mensagensDetalhes" />
         </slot>
 
         <v-form ref="form" :method="method" :action="action" class="pa-2" v-model="valid" @input="value => this.$emit('input', value)" @submit="submit" enctype="multipart/form-data" >
             <input v-if="csrf" type="hidden" name="_token" :value="csrf" />
-                        
+
             <slot></slot>
-            
+
             <slot name="botoes">
                 <v-layout justify-center>
                     <v-btn type="submit" color="primary" :disabled="validar && !valid" >{{btnEnviarText}}</v-btn>
@@ -16,7 +16,7 @@
                 </v-layout>
             </slot>
         </v-form>
-        
+
     </div>
 </template>
 
@@ -25,7 +25,7 @@
         props: {
             value:Boolean,
             /** ======= FORMULARIO */
-            method:{type:String, default:"POST"}, action:String, 
+            method:{type:String, default:"POST"}, action:String,
             csrf:String,
             validar:Boolean,
             resetValidation:Boolean,
@@ -59,14 +59,14 @@
                     e.preventDefault();
                 }
             },
-            formataMensagensDeAlerta(mensagens){  
-                
+            formataMensagensDeAlerta(mensagens){
+
                 this.mostrarAlerta = false;
-                
+
                 let retorno = null
 
                 if(mensagens && mensagens != 'null'){
-                    
+
                     if(this.$isJson(mensagens)){
                         retorno = JSON.parse(mensagens)
                     }
@@ -86,7 +86,7 @@
                 }
             },
         },
-        mounted(){            
+        mounted(){
         },
         updated(){
             if(this.resetValidation){
