@@ -29,7 +29,7 @@
             csrf:String,
             validar:Boolean,
             resetValidation:Boolean,
-            cancelarSubmit:Boolean,
+            cancelarActionSubmit:{type:Boolean},
 
             /** ======= BOTOES */
             btnEnviarText:{type:String, default:'Enviar'},
@@ -55,7 +55,9 @@
             },
             submit(e) {
                 let form = this.$refs.form;
-                if(this.cancelarSubmit || (this.validar && !this.$refs.form.validate())){
+                let tem_action = !!this.action
+                
+                if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs.form.validate())){
                     e.preventDefault();
                 }
             },
