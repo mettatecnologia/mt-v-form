@@ -1,6 +1,6 @@
 {
   "name": "jb-v-form",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/jbmchd/jb-v-form#readme",
   "dependencies": {
-    "jb-v-alerta": "1.0.0",
+    "jb-v-alert": "1.0.0",
     "jb-v-plugin-global": "1.0.0"
   }
 }
