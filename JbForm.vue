@@ -41,7 +41,6 @@
         data: function () {
             return {
                 valid: this.value,
-                mostrarAlerta: false
             }
         },
         computed: {
@@ -54,6 +53,8 @@
                 this.$refs.form.reset();
             },
             submit(e) {
+                this.$emit('submit', e, this.$refs.form.validate());
+                
                 let form = this.$refs.form;
                 let tem_action = !!this.action
                 
@@ -63,11 +64,9 @@
             },
             formataMensagensDeAlerta(mensagens){
 
-                this.mostrarAlerta = false;
-
                 let retorno = null
 
-                if(mensagens && mensagens != 'null'){
+                if(typeof mensagens=='string' && /[a-z0-9]/i.test(mensagens)){
 
                     if(this.$isJson(mensagens)){
                         retorno = JSON.parse(mensagens)
@@ -82,13 +81,12 @@
                         return ;
                     }
 
-                    this.mostrarAlerta = true;
                     return retorno;
 
                 }
             },
         },
-        mounted(){
+        mounted(){            
         },
         updated(){
             if(this.resetValidation){
