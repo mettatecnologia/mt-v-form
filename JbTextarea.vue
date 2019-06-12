@@ -65,14 +65,14 @@ export default {
                 let result = null
 
                 if(this.validacao_tipo(regra) == 'axios'){
-   
+
                     this.loading = true
                     let Promisse = this.validacao_axios(regra, params)
 
                     if(Promisse instanceof Promise){
                         Promisse
-                            .then( response => { 
-                                this.error_messages = typeof response=='string' ? response : null 
+                            .then( response => {
+                                this.error_messages = typeof response=='string' ? response : null
                             })
                             .catch(error => (error))
                             .finally(v => (this.loading = false))
@@ -90,9 +90,9 @@ export default {
                         return result
                     }
                 }
-                
+
             }
-            
+
         },
     },
     watch: {

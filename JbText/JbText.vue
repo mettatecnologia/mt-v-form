@@ -86,7 +86,9 @@ export default {
             var vm = this
             return Object.assign({}, this.$listeners, {
                     input: function (e) {
-                        vm.$emit('input', e)
+                        let value = vm.pegaValorParaEmit(e)
+                        vm.$emit('input', value)
+                        // vm.$emit('input', e)
                         // vm.$emit('input', event.target.value)
                     }
                 }
@@ -134,14 +136,14 @@ export default {
                 let result = null
 
                 if(this.validacao_tipo(regra) == 'axios'){
-   
+
                     this.loading = true
                     let Promisse = this.validacao_axios(regra, params)
 
                     if(Promisse instanceof Promise){
                         Promisse
-                            .then( response => { 
-                                this.error_messages = typeof response=='string' ? response : null 
+                            .then( response => {
+                                this.error_messages = typeof response=='string' ? response : null
                             })
                             .catch(error => (error))
                             .finally(v => (this.loading = false))
@@ -159,9 +161,9 @@ export default {
                         return result
                     }
                 }
-                
+
             }
-            
+
         },
     },
     created(){
