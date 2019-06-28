@@ -1,6 +1,6 @@
 {
   "name": "@metta/mt-v-form",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,8 +19,8 @@
   "homepage": "https://github.com/mettatecnologia/mt-v-form#readme",
   "dependencies": {
     "inputmask": "^4.0.5",
-    "@metta/mt-v-plugin-global": "^1.0.0",
-    "@metta/mt-v-loading": "^1.0.0",
+    "@metta/mt-v-plugin-global": "^1.0.1",
+    "@metta/mt-v-loading": "^1.0.1",
     "@metta/mt-v-alert": "^1.0.0"
   }
 }

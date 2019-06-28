@@ -11,15 +11,15 @@ let mascaras_padrao = [
 ];
 
 
-//================== ALIASES 
+//================== ALIASES
 let mascaras_extendidas = {
     currency:{
         prefix: 'R$ ',
         groupSeparator: '.',
         radixPoint:",",
         numericInput: true,
-        autoGroup: true
-        
+        autoGroup: true,
+        rightAlign: true,
     },
     dinheiro:{
         mask: "R$ (.999){+|1},99",
@@ -34,7 +34,14 @@ let mascaras_extendidas = {
         inputFormat: "dd/mm/yyyy HH:MM:ss",
     },
     percentage: {
+        suffix: "%",
         radixPoint: ",",
+    },
+    porcentagem:{
+        suffix: "%",
+        radixPoint: ",",
+        alias: "numeric",
+        digitsOptional: true,
     },
     decimal: {
         mask: "(.999){+|1},00",
@@ -77,7 +84,7 @@ let mascaras_extendidas = {
         mask: "(99) 99999-9999",
     },
     cartaocredito: {
-        mask: "9999 9999 9999 9999 ",
+        mask: "9999 9999 9999 9999",
     },
     cvc: {
         mask: "999",
@@ -102,14 +109,14 @@ let mascaras_extendidas = {
 export const mask = {
     //aplica a mascara ao input
     bind: function(el, binding) {
-        
+
         let input = el.tagName == "INPUT" ? el : el.getElementsByTagName('input')[0]
-        
+
         let alias = binding.value // mascara ou alias
-        let options = null 
-        
+        let options = null
+
         let tem_mascara_padrao = mascaras_padrao.indexOf(alias) > -1
-        
+
         if(tem_mascara_padrao){
             options = mascaras_extendidas[alias]
         }

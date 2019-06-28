@@ -54,7 +54,7 @@
                      =========================== -->
                 <v-tabs-items v-model="tabs.index">
                     <v-tab-item v-if="picker_tipo=='datetime' || picker_tipo=='date'" >
-                        <v-date-picker v-model="date_picker" @input="datePickerEmitInput" reactive  ref="datepicker"  ></v-date-picker>
+                        <v-date-picker v-model="date_picker" @input="datePickerEmitInput" :reactive="reactive" ref="datepicker" :min="min" :max="max"  ></v-date-picker>
                     </v-tab-item>
                     <v-tab-item v-if="picker_tipo=='datetime' || picker_tipo=='time'" >
                         <v-time-picker v-if="menu.exibir" v-model="time_picker" @input="timePickerEmitInput"  @click:minute="timePickerEmitClick" format="24hr" full-width ></v-time-picker>
@@ -105,6 +105,9 @@ export default {
         iconClickAppend:{type:Function, default:v=>(v)},
         hint:String,
         persistentHint:Boolean,
+        reactive:{type:Boolean, default:true},
+        min:String,max:String,
+
 
         historica:Boolean
     },
@@ -127,7 +130,7 @@ export default {
 
     computed: {
         picker_tipo(){
-            
+
             if( ! this.picker_tipo_aux){
                 this.setarTipoAux()
             }
@@ -136,7 +139,7 @@ export default {
         vmodel () {
             // configurar como os valores devem ser exibidos para usuario
             // o value deve ser sempre no formato bruto (como no banco de dados)
-
+            this.separarDateTime()
             if(this.value || this.date_picker || this.time_picker){
                 if(this.picker_tipo=='time'){
                     return this.time_picker
@@ -150,6 +153,9 @@ export default {
     created(){
         this.setarIconeInput()
         this.separarDateTime()
+        if(this.picker_tipo=='datetime'){
+            this.reactive = false
+        }
     },
     watch: {
         'menu.exibir' (v) {
@@ -191,7 +197,12 @@ export default {
             this.active_date_picker = new_active_date_picker
         },
         timePickerEmitInput(v){
-            this.$emit('input', this.vmodel)
+            if(this.picker_tipo=='datetime'){
+                this.$emit('input', [this.date_picker,this.time_picker].join(' '))
+            }
+            else{
+                this.$emit('input', v)
+            }
         },
         timePickerEmitClick(v){
             if(this.picker_tipo=='datetime'){
@@ -231,9 +242,9 @@ export default {
         },
         separarDateTime(){
             if( ! this.value){
-                return 
+                return
             }
-            
+
             if(this.picker_tipo == 'time'){
                 this.time_picker = this.value
             }
@@ -244,10 +255,12 @@ export default {
         setarDataHoje(){
             this.date_picker = moment().format('YYYY-MM-DD')
             this.menu.exibir = false
+            this.$emit('input', this.date_picker)
         },
         setarHoraAgora(){
             this.time_picker = moment().format('HH:mm')
             this.menu.exibir = false
+            this.$emit('input', this.time_picker)
         },
         setarDataHoraAgora(){
             this.date_picker = moment().format('YYYY-MM-DD')
@@ -255,6 +268,7 @@ export default {
             this.tabs.index = 0
 
             this.menu.exibir = false
+            this.$emit('input', [this.date_picker,this.time_picker].join(' '))
         },
     }
 }

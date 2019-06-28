@@ -45,7 +45,6 @@
 
 import {validacaoMixin} from '../jb-v-mixin-validacao'
 import mask from '../jb-v-diretiva-mask'
-import { log } from 'util';
 
 export default {
     mixins: [validacaoMixin],
@@ -70,7 +69,6 @@ export default {
     },
     data () {return {
         vmodel: this.value,
-        // regras_aux:null,
         error_messages:null
     }},
     computed:{
@@ -84,10 +82,12 @@ export default {
              *          -> Isso garante que o componente funcione com o v-model
              */
             var vm = this
+
             return Object.assign({}, this.$listeners, {
-                    input: function (e) {
+                input: function (e) {
                         let value = vm.pegaValorParaEmit(e)
                         vm.$emit('input', value)
+
                         // vm.$emit('input', e)
                         // vm.$emit('input', event.target.value)
                     }
@@ -116,8 +116,8 @@ export default {
 
                         value = restante ? (inteiro+restante).toFixed(2) : value*100
                     }
-                    else if(this.mascara == 'percentage'){
-                        value = parseFloat(Number(value).toFixed(2))
+                    else if(this.mascara == 'percentage' || this.mascara == 'porcentagem'){
+                        value = value.toString().split('.').join(',')
                     }
                 }
                 this.vmodel = value
@@ -167,7 +167,6 @@ export default {
         },
     },
     created(){
-        // this.regras_aux = this.regras
     },
     mounted(){
     },
@@ -184,8 +183,12 @@ export default {
         pegaValorParaEmit(value){
             //configurar como os valores colocados pelo usuario devem ser guardados na variavel
             var regexDinheiro = /\d+|,(\.\d{3})*(,\d+)?/gm;
-            if((this.mascara == 'dinheiro' || this.mascara == 'currency' || this.mascara == 'percentage') &&  regexDinheiro.test( value )){
+            if((this.mascara == 'dinheiro' || this.mascara == 'currency') &&  regexDinheiro.test( value )){
                 value = value.match( regexDinheiro ).join([]).split('.').join('').split(',').join('.')
+                value = parseFloat(value)
+            }
+            if((this.mascara == 'percentage' || this.mascara == 'porcentagem') &&  regexDinheiro.test( value )){
+                value = value.match( regexDinheiro ).join([]).split(',').join('.')
                 value = parseFloat(value)
             }
             else if(this.mascara=='date'){

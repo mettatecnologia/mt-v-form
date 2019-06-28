@@ -3,14 +3,14 @@
     <!-- o codigo -->
 
     <jb-loading v-model="loading.mostrar"></jb-loading>
-    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" @input="input" :regras="regras"></jb-combobox>
+    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" @input="input" :regras="regras" :disabled="disabled"></jb-combobox>
 </div>
 
 </template>
 
 <script>
 
-import Cidades from './JbCmbCidadesModel'
+import axios from 'axios'
 
 export default {
     props:{
@@ -19,9 +19,9 @@ export default {
         regras:String,
         name:String,
         label:String,
+        disabled:Boolean,
     },
     data: function () { return {
-        CidadesModel: new Cidades({}),
         cidade: null,
         cidades:[],
         loading:{
@@ -51,23 +51,22 @@ export default {
         buscarCidades(uf){
             this.loading.mostrar = true
 
-            this.CidadesModel
-                .buscarCidadesPorEstado(uf)
-                .then(v => {
-                    this.loading.mostrar = false
-                    let response = v.__response
+            axios.get(`buscarCidadesPorEstado/${uf}`)
+            .then(v => {
+                let response = v.data.__response
 
-                    if(response.erro){
-                        this.dialog.form.mensagensTipo_data = response.mensagens_tipo
-                        this.dialog.form.mensagens_data = response.mensagens
+                if(response.erro){
+                    this.dialog.form.mensagensTipo_data = response.mensagens_tipo
+                    this.dialog.form.mensagens_data = response.mensagens
+                }
+                else {
+                    this.cidades = response.dados.length ? this.$criarObjetoParaCombobox(response.dados, 'cidade_nome', 'cidade_cod') : [];
+                    if(this.cidade_cod){
+                        this.selecionarCidade()
                     }
-                    else {
-                        this.cidades = this.$criarObjetoParaCombobox(response.dados, 'cidade_nome', 'cidade_cod');
-                        if(this.cidade_cod){
-                            this.selecionarCidade()
-                        }
-                    }
-            });
+                }
+            })
+            .finally(v => (this.loading.mostrar = false))
         },
         selecionarCidade(){
             let result = this.$buscaItemDatatable(this.cidades, this.cidade_cod)

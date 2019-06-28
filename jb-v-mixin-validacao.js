@@ -66,7 +66,7 @@ export const validacaoMixin = {
             if(regra.indexOf('email-unique')==0){
                 let email_valido = this.$buscarRegExp('email').test(this.value)
                 if( ! email_valido){ return true }
-                return this.__email_unique_regra(params[0])
+                return this.__email_unique_regra(params)
             }
         },
 
@@ -186,14 +186,34 @@ export const validacaoMixin = {
             return true
         },
 
-        __email_unique_regra(url){
-            let value = this.value
+        __email_unique_regra(params){
+            let url = 'verificar-email'
+            let ignore_id = null
+
+            for(let i in params){
+                let param = params[i]
+                let [nome, valor] = param.split('=')
+                switch (nome) {
+                    case 'url':
+                        url = valor
+                        break;
+                    case 'ignore_id':
+                        ignore_id = valor
+                        break;
+                }
+            }
+
+            let email = this.value
 
             if(url=='local'){ /** nada ainda */}
             else {
-                url = url ? url :'verificar-email'
+                url = '/'+url+'/'+email
+                if(ignore_id){
+                    url += '/'+ignore_id
+                }
+
                 let promisse = axios
-                    .get('/'+url+'/'+value)
+                    .get(url)
                     .then(v => {
                         let response = v.data.__response
                         if( ! response.erro){

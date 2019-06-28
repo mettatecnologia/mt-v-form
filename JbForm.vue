@@ -54,10 +54,10 @@
             },
             submit(e) {
                 this.$emit('submit', e, this.$refs.form.validate());
-                
+
                 let form = this.$refs.form;
                 let tem_action = !!this.action
-                
+
                 if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs.form.validate())){
                     e.preventDefault();
                 }
@@ -86,7 +86,7 @@
                 }
             },
         },
-        mounted(){            
+        mounted(){
         },
         updated(){
             if(this.resetValidation){
