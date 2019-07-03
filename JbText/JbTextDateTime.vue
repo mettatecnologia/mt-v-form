@@ -158,6 +158,12 @@ export default {
         }
     },
     watch: {
+        value(v){
+            if( ! v){
+                this.date_picker = null
+                this.time_picker = null
+            }
+        },
         'menu.exibir' (v) {
             if(this.picker_tipo!='time' && this.historica){
                 v && setTimeout(() => (this.$refs.datepicker.activePicker = 'YEAR'))
