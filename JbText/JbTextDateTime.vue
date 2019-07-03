@@ -158,6 +158,13 @@ export default {
         }
     },
     watch: {
+        value(v){
+            if( ! v ){
+                this.date_picker = ''
+                this.time_picker = ''
+            }
+
+        },
         'menu.exibir' (v) {
             if(this.picker_tipo!='time' && this.historica){
                 v && setTimeout(() => (this.$refs.datepicker.activePicker = 'YEAR'))
@@ -177,7 +184,7 @@ export default {
                 }
             }
             else {
-                this.value = ''
+                this.value = null
                 this.date_picker = ''
                 this.time_picker = ''
             }
