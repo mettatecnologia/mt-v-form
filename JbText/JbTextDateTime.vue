@@ -158,12 +158,6 @@ export default {
         }
     },
     watch: {
-        value(v){
-            if( ! v){
-                this.date_picker = null
-                this.time_picker = null
-            }
-        },
         'menu.exibir' (v) {
             if(this.picker_tipo!='time' && this.historica){
                 v && setTimeout(() => (this.$refs.datepicker.activePicker = 'YEAR'))
@@ -173,16 +167,20 @@ export default {
     },
     methods: {
         textFieldEmit(v){
-            if( ! v){ return '' }
+            if(v){
+                v = v.split(' ')
+                v[0] = v[0].split('/').reverse().join('-')
+                v = v.join(' ')
 
-            v = v.split(' ')
-            v[0] = v[0].split('/').reverse().join('-')
-            v = v.join(' ')
-
-            if(moment(v).isValid()){
-                this.$emit('input', v)
+                if(moment(v).isValid()){
+                    this.$emit('input', v)
+                }
             }
-
+            else {
+                this.value = ''
+                this.date_picker = ''
+                this.time_picker = ''
+            }
         },
         datePickerEmitInput(v){
             this.$emit('input', v)

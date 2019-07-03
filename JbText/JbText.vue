@@ -85,7 +85,7 @@ export default {
 
             return Object.assign({}, this.$listeners, {
                 input: function (e) {
-                        let value = vm.pegaValorParaEmit(e)
+                        let value = e ? vm.pegaValorParaEmit(e) : e
                         vm.$emit('input', value)
 
                         // vm.$emit('input', e)
