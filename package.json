@@ -1,6 +1,6 @@
 {
   "name": "@metta/mt-v-form",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,8 @@
   "dependencies": {
     "axios": "^0.18",
     "inputmask": "^4.0.5",
-    "@metta/mt-v-plugin-global": "^1.0.1",
-    "@metta/mt-v-loading": "^1.0.1",
-    "@metta/mt-v-alert": "^1.0.0"
+    "@metta/mt-v-plugin-global": "^2.0.0",
+    "@metta/mt-v-loading": "^2.0.0",
+    "@metta/mt-v-alert": "^2.0.0"
   }
 }

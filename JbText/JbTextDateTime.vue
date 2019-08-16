@@ -5,7 +5,6 @@
             v-model="menu.exibir"
             :close-on-content-click="false"
             :nudge-right="40"
-            lazy
             transition="scale-transition"
             offset-y
             full-width
@@ -38,13 +37,13 @@
                 <!-- ===========================
                             Tabs
                      =========================== -->
-                <v-toolbar v-if="picker_tipo=='datetime'" color="primary" dark tabs >
+                <v-toolbar v-if="picker_tipo=='datetime'" background-color="primary" tabs >
                     <template>
                         <v-tabs v-model="tabs.index" color="primary" grow >
                             <v-tab> <v-icon>event</v-icon> </v-tab>
                             <v-tab> <v-icon>access_time</v-icon> </v-tab>
 
-                            <v-tabs-slider color="yellow"></v-tabs-slider>
+                            <v-tabs-slider color="primary"></v-tabs-slider>
                         </v-tabs>
                     </template>
                 </v-toolbar>
@@ -65,23 +64,23 @@
                 <!-- ===========================
                             Rodape
                      =========================== -->
-                <v-flex xs12 v-if="picker_tipo=='date'" class="py-1 text-xs-center">
+                <v-col cols="12" v-if="picker_tipo=='date'" class="py-1 text-center">
                     <v-btn @click="setarDataHoje" color="primary">Hoje</v-btn>
-                </v-flex>
+                </v-col>
 
-                <v-flex xs12 v-if="picker_tipo=='time'" class="py-1 text-xs-center">
+                <v-col cols="12" v-if="picker_tipo=='time'" class="py-1 text-center">
                     <v-btn @click="setarHoraAgora" color="primary">Agora</v-btn>
-                </v-flex>
+                </v-col>
 
-                <v-layout v-if="picker_tipo=='datetime'"  column >
-                    <v-flex xs12 class="py-2 text-xs-center">
+                <v-row v-if="picker_tipo=='datetime'" no-gutters >
+                    <v-col cols="12" class="py-2 text-center">
                         <strong>{{ vmodel }}</strong>
-                    </v-flex>
+                    </v-col>
 
-                    <v-flex xs12 class="pb-1 text-xs-center">
+                    <v-col cols="12" class="pb-1 text-center">
                         <v-btn @click="setarDataHoraAgora" color="primary">Agora</v-btn>
-                    </v-flex>
-                </v-layout>
+                    </v-col>
+                </v-row>
 
             </v-card>
 
@@ -96,7 +95,7 @@ import moment from 'moment'
 export default {
     props:{
         value:String,
-        regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, min:Number, max:Number,
+        regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean,
         tipo:String,
 
         autofocus:Boolean,
@@ -114,7 +113,7 @@ export default {
 
     data () {return{
         tabs: {
-            index: null
+            index: 0
         },
         menu:{
             exibir: false
@@ -148,6 +147,7 @@ export default {
                     return [this.date_picker.split('-').reverse().join('/'), this.time_picker].join(' ').trim()
                 }
             }
+            return null
         },
     },
     created(){

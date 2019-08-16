@@ -18,7 +18,7 @@
 
             :counter="counter"
             :append-icon="appendIcon"
-            :box="box"
+            :filled="filled"
 
             @click:append="iconClickAppendFunction"
 
@@ -42,7 +42,7 @@ export default {
         label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, rows:Number,
 
         /** vuetify */
-        counter:{type:[Boolean, Number, String]}, appendIcon:String, iconClickAppend:Function, box:Boolean
+        counter:{type:[Boolean, Number, String]}, appendIcon:String, iconClickAppend:Function, filled:Boolean
     },
     data: function () {
         return {

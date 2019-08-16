@@ -10,10 +10,10 @@
             <slot></slot>
 
             <slot name="botoes">
-                <v-layout justify-center>
-                    <v-btn type="submit" color="primary" :disabled="validar && !valid" >{{btnEnviarText}}</v-btn>
-                    <v-btn @click="limpar">{{btnLimparText}}</v-btn>
-                </v-layout>
+                <v-row justify="center">
+                    <v-btn type="submit" color="primary" :disabled="validar && !valid" class="mr-1" >{{btnEnviarText}}</v-btn>
+                    <v-btn @click="limpar" class="ml-1">{{btnLimparText}}</v-btn>
+                </v-row>
             </slot>
         </v-form>
 

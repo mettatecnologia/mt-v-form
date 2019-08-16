@@ -107,7 +107,6 @@ export default {
                 }
 
             }
-
         },
         itens(){
             return this.items

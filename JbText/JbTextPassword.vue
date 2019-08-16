@@ -3,7 +3,7 @@
         <jb-text
             v-model="vmodel"
             :name="name"
-            :label="label"
+            :label="label_cp"
             :regras="regras"
             :type="senha_visivel ? 'text' : 'password'"
 
@@ -30,6 +30,9 @@ export default {
         vmodel(){
             return this.value
         },
+        label_cp(){
+            return this.label || 'Senha'
+        }
     },
     methods:{
         alternarExibicao(){
