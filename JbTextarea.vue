@@ -11,7 +11,7 @@
             :disabled="disabled"
             :rows="rows"
             :readonly="readonly"
-            :ref="id || name"
+            ref="vtextarea"
 
             :rules="vmodelRules"
             :maxlength="limite"
@@ -37,6 +37,7 @@ export default {
         value:String,
 
         regras:String, limite:String,
+        validarNaCriacao:Boolean,
 
         /** comuns */
         label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, rows:Number,
@@ -47,6 +48,7 @@ export default {
     data: function () {
         return {
             vmodel:this.value,
+            validar:false,
         }
     },
     computed:{
@@ -54,46 +56,11 @@ export default {
             return this.regras && this.regras.indexOf('required')>-1 ? `${this.label} *` : this.label
         },
         vmodelRules(){
-            let regras = this.regras;
-
-            if( ! regras || regras === undefined){ return }
-            regras = regras.split('|');
-
-            for(let i in regras){
-                let [regra, ...params] = regras[i].trim().split(':');
-
-                let result = null
-
-                if(this.validacao_tipo(regra) == 'axios'){
-
-                    this.loading = true
-                    let Promisse = this.validacao_axios(regra, params)
-
-                    if(Promisse instanceof Promise){
-                        Promisse
-                            .then( response => {
-                                this.error_messages = typeof response=='string' ? response : null
-                            })
-                            .catch(error => (error))
-                            .finally(v => (this.loading = false))
-                    }
-                    else {
-                        this.loading = false
-                        this.error_messages = null
-                        this.result = null
-                    }
-
-                }
-                else {
-                    result = this.validacao_regular(regra, params)
-                    if(typeof result[0]=='function' && typeof result[0](this.value) == 'string'){
-                        return result
-                    }
-                }
-
-            }
-
+            return this.validar ? this.executarValidacao(this.regras) : [];
         },
+    },
+    created(){
+        this.validar = this.validarNaCriacao
     },
     watch: {
         value: function (newValue, oldValue) {

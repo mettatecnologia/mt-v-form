@@ -1,6 +1,6 @@
 <template>
 
-        <jb-combobox v-model="vmodel" :items="uf" :name="name" :label="label" @input="v => this.$emit('input', v.value)" :regras="regras"  ></jb-combobox>
+        <jb-combobox v-model="vmodel" :items="uf" :name="name" :label="label" @input="v => this.$emit('input', v.value)" :regras="regras" :id="id" ref="jbcombobox" ></jb-combobox>
 
 </template>
 
@@ -12,6 +12,7 @@ export default {
         regras:String,
         name:String,
         label:String,
+        id:String,
     },
     data() {return {
         uf:[

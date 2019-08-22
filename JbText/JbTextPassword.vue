@@ -7,6 +7,12 @@
             :regras="regras"
             :type="senha_visivel ? 'text' : 'password'"
 
+            :id="id"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :readonly="readonly"
+            ref="jbtext"
+
             :append-icon="senha_visivel ? 'visibility' : 'visibility_off'"
 
             @click:append="alternarExibicao"

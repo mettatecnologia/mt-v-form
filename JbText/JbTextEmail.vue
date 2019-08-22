@@ -6,6 +6,12 @@
             :label="label_cp"
             :regras="regras_cp"
 
+            :id="id"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :readonly="readonly"
+            ref="jbtext"
+
             @input="value => this.$emit('input', value)"
         ></jb-text>
 
@@ -17,7 +23,7 @@ export default {
     props:{
         value:String,
         regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, min:Number, max:Number,
-        unique:Array,
+        unique:{type:[Boolean,Array]},
     },
     data: function () {
         return {
@@ -28,16 +34,33 @@ export default {
             return this.value
         },
         regras_cp(){
-            let unique = ''
-            if(this.unique){
-                unique = 'email-unique'
+            let unique = []
 
-                if({}.hasOwnProperty.call(this.unique,'ignore_id') && this.unique.ignore_id>0){
-                    unique += ':ignore_id='+ this.unique.ignore_id
+            if(this.unique){
+                if(this.$typeof(this.unique,'boolean'))
+                {
+                    unique = ['email-unique']
+                }
+                else if(this.$typeof(this.unique,'object'))
+                {
+                    unique = {'email-unique':this.unique}
                 }
             }
 
-            return `email|${this.regras}|${unique}`
+
+
+            let regras = []
+            if(this.$typeof(this.regras,'string'))
+            {
+                regras = [this.regras]
+            }
+            if(typeof this.regras == 'object')
+            {
+                regras = this.regras
+            }
+
+            return regras.concat(unique).concat(['email'])
+
         },
         label_cp(){
             return this.label || 'Email'

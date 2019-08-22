@@ -4,7 +4,7 @@
             <jb-alert v-model="messages" :tipo="mensagensTipo" :tooltip="mensagensDetalhes" />
         </slot>
 
-        <v-form ref="form" :method="method" :action="action" class="pa-2" v-model="valid" @input="value => this.$emit('input', value)" @submit="submit" enctype="multipart/form-data" >
+        <v-form ref="vform" :method="method" :action="action" class="pa-2" v-model="valid" @input="value => this.$emit('input', value)" @submit="submit" enctype="multipart/form-data" >
             <input v-if="csrf" type="hidden" name="_token" :value="csrf" />
 
             <slot></slot>
@@ -28,6 +28,7 @@
             method:{type:String, default:"POST"}, action:String,
             csrf:String,
             validar:Boolean,
+            validarCampos:{type:Boolean, default:true},
             resetValidation:Boolean,
             cancelarActionSubmit:{type:Boolean},
 
@@ -48,17 +49,31 @@
                 return this.formataMensagensDeAlerta(this.mensagens)
             }
         },
+        mounted(){
+            if(this.validarCampos)
+            {
+                this.ativarValidacaoCampos()
+            }
+        },
+        watch:{
+            resetValidation(v){
+                if(v)
+                {
+                    this.$refs.vform.resetValidation();
+                }
+            }
+        },
         methods: {
             limpar(){
-                this.$refs.form.reset();
+                this.$refs.vform.reset();
             },
             submit(e) {
-                this.$emit('submit', e, this.$refs.form.validate());
+                this.$emit('submit', e, this.$refs.vform.validate());
 
-                let form = this.$refs.form;
+                let form = this.$refs.vform;
                 let tem_action = !!this.action
 
-                if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs.form.validate())){
+                if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs.vform.validate())){
                     e.preventDefault();
                 }
             },
@@ -85,13 +100,13 @@
 
                 }
             },
-        },
-        mounted(){
-        },
-        updated(){
-            if(this.resetValidation){
-                this.$refs.form.resetValidation();
-            }
+            ativarValidacaoCampos(){
+                let inputs = this.$refs.vform.inputs
+                for (const i in inputs) {
+                    const input = inputs[i];
+                    input.$parent.validar = true
+                }
+            },
         },
     }
  </script>

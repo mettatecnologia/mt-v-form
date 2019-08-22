@@ -3,7 +3,7 @@
     <!-- o codigo -->
 
     <jb-loading v-model="loading.mostrar"></jb-loading>
-    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" @input="input" :regras="regras" :disabled="disabled"></jb-combobox>
+    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" @input="input" :regras="regras" :disabled="disabled" ref="jbcombobox" :id="id"></jb-combobox>
 </div>
 
 </template>
@@ -20,6 +20,7 @@ export default {
         name:String,
         label:String,
         disabled:Boolean,
+        id:String,
     },
     data: function () { return {
         cidade: null,

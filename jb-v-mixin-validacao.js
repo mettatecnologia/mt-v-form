@@ -1,13 +1,76 @@
-// //================ Axios
 import axios from 'axios'
 
 export const validacaoMixin = {
     data() {return{
-        validando: false
+        validando: false,
     }},
     computed: {
     },
+    mounted(){
+    },
     methods: {
+        executarValidacao(regras){
+
+            if(this.$typeof(regras,'string'))
+            {
+                regras = [regras]
+            }
+
+            for(let i in regras){
+                let result = null
+
+                let regra = null
+                let params = null
+
+                if(this.$typeof(regras,'object'))
+                {
+                    params = regras[i]
+                    regra = i
+                }
+                else
+                {
+                    regra = regras[i]
+
+                    if(this.$typeof(regra,'object')){
+                        result = this.executarValidacao(regra)
+                        if(result){
+                            return result
+                        }
+                    }
+                }
+
+                if(this.validacao_tipo(regra) == 'axios')
+                {
+                    this.loading = true
+                    let Promisse = this.validacao_axios(regra, params)
+
+                    if(Promisse instanceof Promise){
+                        Promisse
+                            .then( response => {
+                                this.error_messages = typeof response=='string' ? response : null
+                            })
+                            .catch(error => (error))
+                            .finally(v => (this.loading = false))
+                    }
+                    else {
+                        this.loading = false
+                        this.error_messages = null
+                        this.result = null
+                    }
+                }
+                else
+                {
+                    this.error_messages = null
+                    result = this.validacao_regular(regra, params)
+
+                    if(typeof result[0]=='function' && typeof result[0](this.value) == 'string'){
+                        return result
+                    }
+                }
+
+            }
+
+        },
         validacao_tipo(regra){
             return ['email-unique'].indexOf(regra)>-1 ? 'axios' : 'regular'
         },
@@ -15,71 +78,217 @@ export const validacaoMixin = {
 
             let result = null
 
-            if(regra.indexOf('required')==0){
-                result = this.__required_regra()
+            if(regra == 'required'){
+                result = this.__required_regra(params)
             }
 
-            if(regra.indexOf('match:')==0){
-                let field = params[0];
-                result = this.__match_regra(field);
+            if(regra == 'match'){
+                result = this.__match_regra(params);
             }
 
             if(this.value){
-                if(regra.indexOf('email')==0){
+
+                if(regra == 'email'){
                     result = this.__email_regra()
                 }
-                if(regra.indexOf('cpf')==0){
+                if(regra == 'cpf'){
                     result = this.__cpf_regra();
                 }
-                if(regra.indexOf('cnpj')==0){
+                if(regra == 'cnpj'){
                     result = this.__cnpj_regra();
                 }
-                if(regra.indexOf('cpf_cnpj')==0){
+                if(regra == 'cpf_cnpj'){
                     result = this.__cpf_cnpj_regra();
                 }
-                if(regra.indexOf('min:')==0){
-                    let min = params[0];
+                if(regra == 'min'){
+                    let min = params;
                     result = this.__min_regra(min);
                 }
-                if(regra.indexOf('max:')==0){
-                    let max = params[0];
+                if(regra == 'max'){
+                    let max = params;
                     result = this.__max_regra(max);
                 }
-                if(regra.indexOf('date')==0){
-                    if(regra.indexOf('datetime')==0){
+                if(regra == 'date'){
+                    if(regra == 'datetime'){
                         result = this.__datahora_regra();
                     }
                     else {
                         result = this.__date_regra();
                     }
                 }
-                if(regra.indexOf('time')==0){
+                if(regra == 'time'){
                     result = this.__time_regra();
                 }
-                if(regra.indexOf('datahora')==0){
+                if(regra == 'datahora'){
                     result = this.__datahora_regra();
                 }
             }
+
             return [result]
         },
         validacao_axios(regra, params){
-            if(regra.indexOf('email-unique')==0){
+            if(regra == 'email-unique'){
                 let email_valido = this.$buscarRegExp('email').test(this.value)
                 if( ! email_valido){ return true }
                 return this.__email_unique_regra(params)
             }
         },
+        getFormComponent(VueComponent){
+
+            let VueComp = VueComponent ? VueComponent : this
+            VueComp = VueComp.$parent
+            if(VueComp._vnode.tag == 'form')
+            {
+                return VueComp
+            }
+            else if(VueComp.$parent) {
+                VueComp = this.getFormComponent(VueComp)
+            }
+            else {
+                VueComp = false
+            }
+
+            return VueComp;
+        },
+        getFormInputsComponents(VueComponent, FormComponent){
+            if( ! FormComponent)
+            {
+                FormComponent = this.getFormComponent(VueComponent)
+            }
+            return FormComponent ? FormComponent.inputs : null
+        },
+        getFormInputComponent(idOuName, inputs){
+            if( ! inputs || !this.$typeof(inputs,'array'))
+            {
+                inputs = this.getFormInputsComponents(this)
+            }
+
+            for (const i in inputs) {
+                const Input = inputs[i];
+                let input = Input.$refs.input
+
+                if(input.id == idOuName || input.name == idOuName )
+                {
+                    return Input
+                }
+            }
+
+            return false;
+
+        },
 
         /**
          * ======================
-         * Regras
+         * Regras acumulativas
          * ======================
          */
-        __required_regra(){
+        __required_regra(subregras){
             let v = this.value
-            let msg = 'Este campo é obrigatório.'
-            return v => !!v || msg
+            let msg = ''
+            let result = true
+
+            if(subregras && Object.keys(subregras).length)
+            {
+                for (const subregra in subregras) {
+                    let campos = subregras[subregra];
+                    campos = this.$typeof(campos,'string') ? [campos] : campos
+                    let campos_nomes_exibicao = []
+                    switch (subregra) {
+                        case 'or': {
+                            let values = [v]
+                            for (const i in campos) {
+                                const Input = this.getFormInputComponent(campos[i]);
+                                const input = Input ? Input.$refs.input : null
+                                if(input)
+                                {
+                                    campos_nomes_exibicao.push(Input.$parent.label || Input.$parent.id || Input.$parent.name)
+                                    values.push(Input.value)
+                                }
+                            }
+                            let array_sem_valores_null = values.filter(Boolean)
+
+                            msg = 'Pelo menos um desses campos é obrigatório: ' + [this.label || this.id || this.name].concat(campos_nomes_exibicao).join(', ')
+                            result = () => array_sem_valores_null.length > 0 || msg
+
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+
+                }
+            }
+            else
+            {
+                msg = 'Este campo é obrigatório.'
+                result = v => !!v || msg
+
+            }
+
+            return result
         },
+        __min_regra(min){
+            let ecurrency = {}.hasOwnProperty.call(this.regras,'currency')
+            let mascara = this.mascara
+
+            if(this.type=='number' || ecurrency || mascara=='integer'){
+                let v = this.value
+                let msg = 'No mínimo '+min
+                return v => (v && parseFloat(v) >= parseFloat(min)) || msg
+            }
+            else {
+                let v = this.value
+                let msg = 'No mínimo '+min+' caracteres'
+                return v => (v && v.length >= min) || msg
+            }
+        },
+        __max_regra(max){
+            let ecurrency = {}.hasOwnProperty.call(this.regras,'currency')
+            let mascara = this.mascara
+
+            if(this.type=='number' || ecurrency || mascara=='percentage' || mascara=='integer'){
+                let v = this.value
+                let msg = 'No máximo '+max
+                return v => (v && parseFloat(v) <= parseFloat(max)) || msg
+            }
+            else {
+                let v = this.value
+                let msg = 'No máximo '+max+' caracteres'
+                return v => (v && v.length <= max) || msg
+            }
+        },
+        __match_regra(campos){
+            let v = this.value
+            let values = []
+            let campos_nomes_exibicao = []
+
+            for (const i in campos) {
+                const Input = this.getFormInputComponent(campos[i]);
+                const input = Input ? Input.$refs.input : null
+                if(input)
+                {
+                    let this_value = this.value ? this.value.trim() : ''
+                    let input_value = Input.value ? Input.value.trim() :  ''
+
+                    campos_nomes_exibicao.push(Input.$parent.label || Input.$parent.id || Input.$parent.name)
+                    if( this_value == input_value ){
+                        values.push(input_value)
+                    }
+
+                }
+            }
+
+            let msg = 'Os seguinte campos precisam ser iguais: ' + [this.label || this.id || this.name].concat(campos_nomes_exibicao).join(', ')
+
+            return () => values.length == campos.length || msg
+        },
+
+        /**
+         * ======================
+         * Regras não acumulativas
+         * ======================
+         */
         __email_regra(){
             let v = this.value
             let msg = 'Digite um email válido (ex.: usuario@servidor.com).'
@@ -96,7 +305,8 @@ export const validacaoMixin = {
             return v => this.$buscarRegExp('cnpj').test(v) || msg
         },
         __cpf_cnpj_regra(){
-            var numbers = this.value ? this.value.match(/\d+/g).join('') : 0;
+
+            var numbers = this.value && this.value.match(/\d+/g) ? this.value.match(/\d+/g).join('') : 0;
             if(this.value && numbers.length>11){
                 return this.__cnpj_regra()
             }
@@ -133,67 +343,17 @@ export const validacaoMixin = {
                 }
             }
 
-            return msg || true;
+            return v => msg
         },
-        __min_regra(min){
-            let ecurrency = this.regras.split('|').indexOf('currency')>-1
-            let mascara = this.mascara
+        __email_unique_regra(subregras){
 
-            if(this.type=='number' || ecurrency || mascara=='integer'){
-                let v = this.value
-                let msg = 'No mínimo '+min
-                return v => (v && parseFloat(v) >= parseFloat(min)) || msg
-            }
-            else {
-                let v = this.value
-                let msg = 'No mínimo '+min+' caracteres'
-                return v => (v && v.length >= min) || msg
-            }
-        },
-        __max_regra(max){
-            let ecurrency = this.regras.split('|').indexOf('currency')>-1
-            let mascara = this.mascara
-
-            if(this.type=='number' || ecurrency || mascara=='percentage' || mascara=='integer'){
-                let v = this.value
-                let msg = 'No máximo '+max
-                return v => (v && parseFloat(v) <= parseFloat(max)) || msg
-            }
-            else {
-                let v = this.value
-                let msg = 'No máximo '+max+' caracteres'
-                return v => (v && (!!max || v.length <= max)) || msg
-            }
-        },
-        __match_regra(field){
-            let inputs = document.getElementsByTagName('input')
-
-            let input = inputs.namedItem(field)
-            if(input){
-                if(input.value){
-                    let input_label = input.getAttribute('aria-label')
-
-                    let msg = 'O valor deve ser igual'
-                    let v = this.value
-                    msg +=  input_label ? ' ao do campo ['+input_label+']':'.'
-                    return v => (!!v && v) == input.value || msg
-                }
-            }
-            else {
-                console.log(`campo '${field}' não encontrado, verique se o mesmo possui a campo 'name' com este nome.`);
-            }
-
-            return true
-        },
-
-        __email_unique_regra(params){
             let url = 'verificar-email'
             let ignore_id = null
 
-            for(let i in params){
-                let param = params[i]
-                let [nome, valor] = param.split('=')
-                switch (nome) {
+            for(let subregra in subregras){
+                let valor = subregras[subregra]
+
+                switch (subregra) {
                     case 'url':
                         url = valor
                         break;

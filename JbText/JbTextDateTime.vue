@@ -13,9 +13,14 @@
         >
             <template v-slot:activator="{ on }">
                 <jb-text
-                    ref="dtp_input"
+                    ref="jbtext"
 
                     v-model="vmodel"
+
+                    :id="id"
+                    :placeholder="placeholder"
+                    :name="name"
+                    :disabled="disabled"
 
                     :label="label"
                     :hint="hint"
@@ -24,7 +29,7 @@
                     :readonly="readonly"
                     clearable
 
-                    :regras="picker_tipo+'|'+regras"
+                    :regras="regras_validacao"
                     :mascara="picker_tipo"
 
                     v-on="on"
@@ -33,56 +38,7 @@
                 ></jb-text>
             </template>
 
-            <v-card>
-                <!-- ===========================
-                            Tabs
-                     =========================== -->
-                <v-toolbar v-if="picker_tipo=='datetime'" background-color="primary" tabs >
-                    <template>
-                        <v-tabs v-model="tabs.index" color="primary" grow >
-                            <v-tab> <v-icon>event</v-icon> </v-tab>
-                            <v-tab> <v-icon>access_time</v-icon> </v-tab>
-
-                            <v-tabs-slider color="primary"></v-tabs-slider>
-                        </v-tabs>
-                    </template>
-                </v-toolbar>
-
-                <!-- ===========================
-                            Datepicker (trabalha apenas com datas yyyy-mm-dd)
-                     =========================== -->
-                <v-tabs-items v-model="tabs.index">
-                    <v-tab-item v-if="picker_tipo=='datetime' || picker_tipo=='date'" >
-                        <v-date-picker v-model="date_picker" @input="datePickerEmitInput" :reactive="reactive" ref="datepicker" :min="min" :max="max"  ></v-date-picker>
-                    </v-tab-item>
-                    <v-tab-item v-if="picker_tipo=='datetime' || picker_tipo=='time'" >
-                        <v-time-picker v-if="menu.exibir" v-model="time_picker" @input="timePickerEmitInput"  @click:minute="timePickerEmitClick" format="24hr" full-width ></v-time-picker>
-                    </v-tab-item>
-                </v-tabs-items>
-
-
-                <!-- ===========================
-                            Rodape
-                     =========================== -->
-                <v-col cols="12" v-if="picker_tipo=='date'" class="py-1 text-center">
-                    <v-btn @click="setarDataHoje" color="primary">Hoje</v-btn>
-                </v-col>
-
-                <v-col cols="12" v-if="picker_tipo=='time'" class="py-1 text-center">
-                    <v-btn @click="setarHoraAgora" color="primary">Agora</v-btn>
-                </v-col>
-
-                <v-row v-if="picker_tipo=='datetime'" no-gutters >
-                    <v-col cols="12" class="py-2 text-center">
-                        <strong>{{ vmodel }}</strong>
-                    </v-col>
-
-                    <v-col cols="12" class="pb-1 text-center">
-                        <v-btn @click="setarDataHoraAgora" color="primary">Agora</v-btn>
-                    </v-col>
-                </v-row>
-
-            </v-card>
+            <jb-datetime-picker ref="jb-datetime-picker" v-model="picker.value" :tipo="tipo" :reactive="reactive" :min="min" :max="max" :historica="historica"></jb-datetime-picker>
 
         </v-menu>
 
@@ -91,12 +47,12 @@
 <script>
 
 import moment from 'moment'
+import { format } from 'path';
 
 export default {
     props:{
         value:String,
         regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean,
-        tipo:String,
 
         autofocus:Boolean,
         counter:{type:[Boolean, Number, String]},
@@ -104,73 +60,97 @@ export default {
         iconClickAppend:{type:Function, default:v=>(v)},
         hint:String,
         persistentHint:Boolean,
-        reactive:{type:Boolean, default:true},
+
+        tipo:String,
+        historica:Boolean,
+        reactive:Boolean,
         min:String,max:String,
-
-
-        historica:Boolean
     },
 
     data () {return{
-        tabs: {
-            index: 0
-        },
         menu:{
             exibir: false
         },
         input:{
             appendIcon: this.appendIcon
         },
-        date_picker: null,
-        time_picker: null,
-        active_date_picker: 'DATE',
-        picker_tipo_aux: this.tipo
+        picker:{
+            value: this.value
+        },
+        jb_datetime_picker: false,
     }},
 
     computed: {
         picker_tipo(){
-
-            if( ! this.picker_tipo_aux){
-                this.setarTipoAux()
+            if(this.tipo)
+            {
+                return this.tipo
             }
-            return this.picker_tipo_aux=='time' || this.picker_tipo_aux=='datetime' ? this.picker_tipo_aux : 'date'
+
+            let isDate = this.picker.value.indexOf('-')>-1
+            let isTime = this.picker.value.indexOf(':')>-1
+
+            if(isDate && isTime){
+                return 'datetime'
+            }
+            if(isDate)
+            {
+                return 'date'
+            }
+            else {
+                return 'time'
+            }
+
         },
         vmodel () {
-            // configurar como os valores devem ser exibidos para usuario
-            // o value deve ser sempre no formato bruto (como no banco de dados)
-            this.separarDateTime()
-            if(this.value || this.date_picker || this.time_picker){
-                if(this.picker_tipo=='time'){
-                    return this.time_picker
+            if(this.value || this.picker.value){
+                if(this.picker_tipo == 'datetime'){
+                    return moment(this.value).format('DD/MM/YYYY HH:mm')
                 }
-                else {
-                    return [this.date_picker.split('-').reverse().join('/'), this.time_picker].join(' ').trim()
+                if(this.picker_tipo == 'date')
+                {
+                    return moment(this.value).format('DD/MM/YYYY')
+                }
+                else if(this.picker_tipo == 'time') {
+                    return this.value
                 }
             }
             return null
         },
+        regras_validacao()
+        {
+            return [this.picker_tipo,this.regras]
+        }
     },
     created(){
         this.setarIconeInput()
-        this.separarDateTime()
-        if(this.picker_tipo=='datetime'){
-            this.reactive = false
+    },
+    updated(){
+        if(this.$refs['jb-datetime-picker'] && ! this.jb_datetime_picker)
+        {
+            this.jb_datetime_picker = this.$refs['jb-datetime-picker']
         }
     },
     watch: {
         value(v){
             if( ! v ){
-                this.date_picker = ''
-                this.time_picker = ''
+                this.picker.value = ''
             }
+            this.$emit('input', v)
+        },
+        'picker.value'(v){
+            this.value = v
+        },
+        'menu.exibir'(abrir){
+            if(abrir && this.$refs['jb-datetime-picker'])
+            {
+                this.$refs['jb-datetime-picker'].selecionou = false
+            }
+        },
+        'jb_datetime_picker.selecionou'(selecionou){
+            this.menu.exibir = ! selecionou
+        }
 
-        },
-        'menu.exibir' (v) {
-            if(this.picker_tipo!='time' && this.historica){
-                v && setTimeout(() => (this.$refs.datepicker.activePicker = 'YEAR'))
-                this.active_date_picker = 'YEAR'
-            }
-        },
     },
     methods: {
         textFieldEmit(v){
@@ -185,56 +165,6 @@ export default {
             }
             else {
                 this.value = null
-                this.date_picker = ''
-                this.time_picker = ''
-            }
-        },
-        datePickerEmitInput(v){
-            this.$emit('input', v)
-            let old_active_date_picker = this.active_date_picker
-            let new_active_date_picker = this.$refs.datepicker.activePicker
-
-            let date_picker_date = old_active_date_picker == 'DATE' && new_active_date_picker == 'DATE'
-
-            if(date_picker_date){
-                if(this.picker_tipo=='datetime' ){
-                    this.tabs.index = 1
-                }
-                else {
-                    this.menu.exibir = false
-                }
-            }
-
-            this.active_date_picker = new_active_date_picker
-        },
-        timePickerEmitInput(v){
-            if(this.picker_tipo=='datetime'){
-                this.$emit('input', [this.date_picker,this.time_picker].join(' '))
-            }
-            else{
-                this.$emit('input', v)
-            }
-        },
-        timePickerEmitClick(v){
-            if(this.picker_tipo=='datetime'){
-                this.tabs.index = 0
-            }
-            this.menu.exibir = false
-        },
-        setarTipoAux(){
-            if( ! this.picker_tipo_aux){
-                let tipo = null
-                if(this.$buscarRegExp('time').test(this.value)){
-                    tipo = 'time'
-                }
-                else if(this.$buscarRegExp('date_us').test(this.value)){
-                    tipo = 'date'
-                }
-                else if(this.$buscarRegExp('datetime_us').test(this.value)){
-                    tipo = 'datetime'
-                }
-
-                this.picker_tipo_aux = tipo
             }
         },
         setarIconeInput(){
@@ -248,38 +178,7 @@ export default {
             else {
                 icone = 'event'
             }
-
             this.input.appendIcon = icone
-        },
-        separarDateTime(){
-            if( ! this.value){
-                return
-            }
-
-            if(this.picker_tipo == 'time'){
-                this.time_picker = this.value
-            }
-            else {
-                [this.date_picker, this.time_picker] = this.value.split(' ')
-            }
-        },
-        setarDataHoje(){
-            this.date_picker = moment().format('YYYY-MM-DD')
-            this.menu.exibir = false
-            this.$emit('input', this.date_picker)
-        },
-        setarHoraAgora(){
-            this.time_picker = moment().format('HH:mm')
-            this.menu.exibir = false
-            this.$emit('input', this.time_picker)
-        },
-        setarDataHoraAgora(){
-            this.date_picker = moment().format('YYYY-MM-DD')
-            this.time_picker = moment().format('HH:mm')
-            this.tabs.index = 0
-
-            this.menu.exibir = false
-            this.$emit('input', [this.date_picker,this.time_picker].join(' '))
         },
     }
 }

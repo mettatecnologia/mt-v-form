@@ -10,7 +10,7 @@
             :name="name"
             :disabled="disabled"
             :readonly="readonly"
-            :ref="id || name"
+            ref="vcombobox"
             :maxlength="limite"
 
             :items="itens"
@@ -47,6 +47,7 @@ export default {
         value:Object,
 
         regras:String, mascara:String,
+        validarNaCriacao:Boolean,
 
         /** comuns */
         label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, limite:String,
@@ -62,55 +63,24 @@ export default {
         vmodel(){
             return this.value
         },
+        eObrigatorio(){
+            return this.$typeof(this.regras,'object') ? {}.hasOwnProperty.call(this.regras,'required') : this.regras.indexOf('required') > -1
+        },
         label_comp(){
-            return this.regras && this.label && this.regras.indexOf('required')>-1 ? `${this.label} *` : this.label
+            return this.regras && this.label && this.eObrigatorio ? `${this.label} *` : this.label
         },
         vmodelMask(){
             return this.mascara
         },
         vmodelRules(){
-            let regras = this.regras;
-
-            if( ! regras || regras === undefined){ return }
-            regras = regras.split('|');
-
-            for(let i in regras){
-                let [regra, ...params] = regras[i].trim().split(':');
-
-                let result = null
-
-                if(this.validacao_tipo(regra) == 'axios'){
-
-                    this.loading = true
-                    let Promisse = this.validacao_axios(regra, params)
-
-                    if(Promisse instanceof Promise){
-                        Promisse
-                            .then( response => {
-                                this.error_messages = typeof response=='string' ? response : null
-                            })
-                            .catch(error => (error))
-                            .finally(v => (this.loading = false))
-                    }
-                    else {
-                        this.loading = false
-                        this.error_messages = null
-                        this.result = null
-                    }
-
-                }
-                else {
-                    result = this.validacao_regular(regra, params)
-                    if(typeof result[0]=='function' && typeof result[0](this.value) == 'string'){
-                        return result
-                    }
-                }
-
-            }
+            return this.validar ? this.executarValidacao(this.regras) : [];
         },
         itens(){
             return this.items
         }
+    },
+    created(){
+        this.validar = this.validarNaCriacao
     },
 }
 </script>
