@@ -10,9 +10,9 @@
             :placeholder="placeholder"
             :disabled="disabled"
             :readonly="readonly"
-            ref="jbtext"
+            :ref="vuetify_ref"
 
-            @input="value => this.$emit('input', value)"
+            @input="v => this.$emit('input', v)"
         ></jb-text>
 
 </template>
@@ -25,14 +25,10 @@ export default {
         regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, min:Number, max:Number,
         unique:{type:[Boolean,Array]},
     },
-    data: function () {
-        return {
-        }
-    },
+    data() { return {
+        vmodel:this.value,
+    }},
     computed:{
-        vmodel(){
-            return this.value
-        },
         regras_cp(){
             let unique = []
 
@@ -68,6 +64,9 @@ export default {
         name_cp(){
             return this.name || 'email'
         },
+        vuetify_ref(){
+            return this.ref || 'jb-text'
+        }
     },
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
 
-        <jb-combobox v-model="vmodel" :items="tipos" :name="name" :label="label" @input="v => this.$emit('input', v.value)" :regras="regras" ref="jbcombobox" :id="id"> </jb-combobox>
+        <jb-combobox v-model="vmodel" :items="tipos" :name="name" :label="label" @input="v => this.$emit('input', v.value)" :regras="rules" :ref="vuetify_ref" :id="id"> </jb-combobox>
 
 </template>
 
@@ -8,8 +8,7 @@
 
 export default {
     props:{
-        value:String,
-        regras:String,
+        rules:String,
         name:String,
         label:String,
         id:String,
@@ -69,8 +68,8 @@ export default {
 
     }},
     computed:{
-        vmodel(){
-            return this.value
+        vuetify_ref(){
+            return this.ref || 'jb-combobox'
         }
     },
 }

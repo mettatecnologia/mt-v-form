@@ -165,7 +165,8 @@ export const validacaoMixin = {
 
             for (const i in inputs) {
                 const Input = inputs[i];
-                let input = Input.$refs.input
+
+                let input = Input._props
 
                 if(input.id == idOuName || input.name == idOuName )
                 {
@@ -198,7 +199,7 @@ export const validacaoMixin = {
                             let values = [v]
                             for (const i in campos) {
                                 const Input = this.getFormInputComponent(campos[i]);
-                                const input = Input ? Input.$refs.input : null
+                                const input = Input ? Input._props : null
                                 if(input)
                                 {
                                     campos_nomes_exibicao.push(Input.$parent.label || Input.$parent.id || Input.$parent.name)
@@ -229,7 +230,8 @@ export const validacaoMixin = {
             return result
         },
         __min_regra(min){
-            let ecurrency = {}.hasOwnProperty.call(this.regras,'currency')
+            let regras = this.regras || this.rules
+            let ecurrency = {}.hasOwnProperty.call(regras,'currency')
             let mascara = this.mascara
 
             if(this.type=='number' || ecurrency || mascara=='integer'){
@@ -244,7 +246,11 @@ export const validacaoMixin = {
             }
         },
         __max_regra(max){
-            let ecurrency = {}.hasOwnProperty.call(this.regras,'currency')
+            let regras = this.regras || this.rules
+            if(!max || max<1){
+                return true
+            }
+            let ecurrency = {}.hasOwnProperty.call(regras,'currency')
             let mascara = this.mascara
 
             if(this.type=='number' || ecurrency || mascara=='percentage' || mascara=='integer'){
@@ -259,13 +265,17 @@ export const validacaoMixin = {
             }
         },
         __match_regra(campos){
+
             let v = this.value
             let values = []
             let campos_nomes_exibicao = []
+            if(this.$typeof(campos,'string')){
+                campos = [campos]
+            }
 
             for (const i in campos) {
                 const Input = this.getFormInputComponent(campos[i]);
-                const input = Input ? Input.$refs.input : null
+                const input = Input ? Input._props : null
                 if(input)
                 {
                     let this_value = this.value ? this.value.trim() : ''

@@ -7,7 +7,6 @@
             :nudge-right="40"
             transition="scale-transition"
             offset-y
-            full-width
             max-width="290px"
             min-width="290px"
         >
@@ -29,7 +28,7 @@
                     :readonly="readonly"
                     clearable
 
-                    :regras="regras_validacao"
+                    :regras="rules_validacao"
                     :mascara="picker_tipo"
 
                     v-on="on"
@@ -47,12 +46,11 @@
 <script>
 
 import moment from 'moment'
-import { format } from 'path';
 
 export default {
     props:{
         value:String,
-        regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean,
+        rules:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean,
 
         autofocus:Boolean,
         counter:{type:[Boolean, Number, String]},
@@ -117,9 +115,14 @@ export default {
             }
             return null
         },
-        regras_validacao()
+        rules_validacao()
         {
-            return [this.picker_tipo,this.regras]
+            let rules = [this.picker_tipo]
+            if(this.rules){
+                rules.push(this.rules)
+            }
+
+            return rules
         }
     },
     created(){

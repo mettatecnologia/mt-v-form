@@ -1,10 +1,10 @@
 <template>
     <div>
         <slot name="mensagens">
-            <jb-alert v-model="messages" :tipo="mensagensTipo" :tooltip="mensagensDetalhes" />
+            <jb-alert v-model="messages" :color="mensagensTipo" :tooltip="mensagensDetalhes" dense />
         </slot>
 
-        <v-form ref="vform" :method="method" :action="action" class="pa-2" v-model="valid" @input="value => this.$emit('input', value)" @submit="submit" enctype="multipart/form-data" >
+        <v-form :ref="vuetify_ref" :method="method" :action="action" class="pa-2" v-model="valid" @input="v => this.$emit('input', v)" @submit="submit" enctype="multipart/form-data" >
             <input v-if="csrf" type="hidden" name="_token" :value="csrf" />
 
             <slot></slot>
@@ -22,6 +22,7 @@
 
 <script>
     export default {
+        extends: window.Vue._VForm,
         props: {
             value:Boolean,
             /** ======= FORMULARIO */
@@ -47,9 +48,14 @@
         computed: {
             messages: function () {
                 return this.formataMensagensDeAlerta(this.mensagens)
+            },
+            vuetify_ref(){
+                return this.ref || 'v-form'
             }
         },
         mounted(){
+            this.$mesclarComponentesViaRef(this,'_events')
+
             if(this.validarCampos)
             {
                 this.ativarValidacaoCampos()
@@ -59,21 +65,21 @@
             resetValidation(v){
                 if(v)
                 {
-                    this.$refs.vform.resetValidation();
+                    this.$refs[this.vuetify_ref].resetValidation();
                 }
             }
         },
         methods: {
             limpar(){
-                this.$refs.vform.reset();
+                this.$refs[this.vuetify_ref].reset();
             },
             submit(e) {
-                this.$emit('submit', e, this.$refs.vform.validate());
+                this.$emit('submit', e, this.$refs[this.vuetify_ref].validate());
 
-                let form = this.$refs.vform;
+                let form = this.$refs[this.vuetify_ref];
                 let tem_action = !!this.action
 
-                if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs.vform.validate())){
+                if( ! tem_action || this.cancelarActionSubmit || (this.validar && !this.$refs[this.vuetify_ref].validate())){
                     e.preventDefault();
                 }
             },
@@ -101,7 +107,7 @@
                 }
             },
             ativarValidacaoCampos(){
-                let inputs = this.$refs.vform.inputs
+                let inputs = this.$refs[this.vuetify_ref].inputs
                 for (const i in inputs) {
                     const input = inputs[i];
                     input.$parent.validar = true

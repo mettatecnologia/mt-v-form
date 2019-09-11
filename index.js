@@ -1,5 +1,12 @@
 let Vue = window.Vue
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+Vue['_VForm'] = _interopRequireDefault(require("vuetify/lib/components/VForm/VForm")).default;
+Vue['_VTextField'] = _interopRequireDefault(require("vuetify/lib/components/VTextField/VTextField")).default;
+Vue['_VSelect'] = _interopRequireDefault(require("vuetify/lib/components/VSelect/VSelect")).default;
+Vue['_VCombobox'] = _interopRequireDefault(require("vuetify/lib/components/VCombobox/VCombobox")).default;
+Vue['_VTextarea'] = _interopRequireDefault(require("vuetify/lib/components/VTextarea/VTextarea")).default;
+
 Vue.component('jb-form', require('./JbForm.vue').default);
 Vue.component('jb-textarea', require('./JbTextarea.vue').default);
 

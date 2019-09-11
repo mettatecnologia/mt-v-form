@@ -2,27 +2,13 @@
 
         <v-combobox
             v-model="vmodel"
-
             :label="label_comp"
-            :id="id"
-            :type="type"
-            :placeholder="placeholder"
-            :name="name"
-            :disabled="disabled"
-            :readonly="readonly"
-            ref="vcombobox"
-            :maxlength="limite"
-
-            :items="itens"
-            :append-icon="appendIcon"
             :rules="vmodelRules"
             :error-messages="error_messages"
-            v-mask="vmodelMask"
+            :name="name"
             :search-input.sync="search"
 
-            @input="v => this.$emit('input', v)"
-            @change="v => this.$emit('change', v)"
-
+            :ref="vuetify_ref"
         >
             <template v-slot:no-data>
                 <v-list-tile>
@@ -39,48 +25,29 @@
 
 <script>
 
-import {validacaoMixin} from '../jb-v-mixin-validacao'
+import {validacaoMixin} from '../mixins/jb-v-mixin-validacao'
+import {inputBaseMixin} from '../mixins/jb-v-mixin-input-base'
 
 export default {
-    mixins: [validacaoMixin],
-    props:{
-        value:Object,
-
-        regras:String, mascara:String,
-        validarNaCriacao:Boolean,
-
-        /** comuns */
-        label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, limite:String,
-
-        /** vuetify */
-       items:Array, appendIcon:String
-    },
+    extends: window.Vue._VCombobox,
+    mixins: [validacaoMixin, inputBaseMixin],
     data() {return{
         search:'',
-        error_messages:null
     }},
     computed:{
         vmodel(){
+            if(typeof this.itens[0] == 'object'){
+                let result = this.$buscaItemDatatable(this.itens,this.value)
+                if(result){ return result.result }
+            }
             return this.value
-        },
-        eObrigatorio(){
-            return this.$typeof(this.regras,'object') ? {}.hasOwnProperty.call(this.regras,'required') : this.regras.indexOf('required') > -1
-        },
-        label_comp(){
-            return this.regras && this.label && this.eObrigatorio ? `${this.label} *` : this.label
-        },
-        vmodelMask(){
-            return this.mascara
-        },
-        vmodelRules(){
-            return this.validar ? this.executarValidacao(this.regras) : [];
         },
         itens(){
             return this.items
+        },
+        vuetify_ref(){
+            return this.ref || 'v-combobox'
         }
-    },
-    created(){
-        this.validar = this.validarNaCriacao
     },
 }
 </script>

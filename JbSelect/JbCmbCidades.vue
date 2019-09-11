@@ -3,7 +3,7 @@
     <!-- o codigo -->
 
     <jb-loading v-model="loading.mostrar"></jb-loading>
-    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" @input="input" :regras="regras" :disabled="disabled" ref="jbcombobox" :id="id"></jb-combobox>
+    <jb-combobox v-model="cidade" :items="cidades" :name="name" :label="label" :regras="rules" :disabled="disabled" :ref="vuetify_ref" :id="id" @input="v => this.$emit('input', v.value)"></jb-combobox>
 </div>
 
 </template>
@@ -14,9 +14,8 @@ import axios from 'axios'
 
 export default {
     props:{
-        value:String,
         uf:String,
-        regras:String,
+        rules:String,
         name:String,
         label:String,
         disabled:Boolean,
@@ -33,6 +32,9 @@ export default {
         cidade_cod(){
             return this.value
         },
+        vuetify_ref(){
+            return this.ref || 'jb-combobox'
+        }
     },
     created(){
         if(this.uf){
@@ -46,9 +48,6 @@ export default {
         },
     },
     methods:{
-        input(v){
-            this.$emit('input', v.value)
-        },
         buscarCidades(uf){
             this.loading.mostrar = true
 

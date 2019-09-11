@@ -1,78 +1,34 @@
 <template>
 
-        <v-text-field
-            v-model="vmodel_comp"
+    <v-text-field
+        :label="label_comp"
+        :error-messages="error_messages"
+        :rules="vmodelRules"
 
-            :label="label_comp"
-            :id="id"
-            :placeholder="placeholder"
-            :name="name"
-            :disabled="disabled"
-            :readonly="readonly"
-            ref="vtext"
+        :name="name"
 
-            :type="type"
-            :min="min"
-            :max="max"
+        v-model="vmodel_comp"
+        v-mask="vmodelMask"
+        v-on="inputListeners"
 
-            :rules="vmodelRules"
-            :error-messages="error_messages"
-            v-mask="vmodelMask"
+        :ref="vuetify_ref"
+    >
 
-            :maxlength="limite"
-
-            :autofocus="autofocus"
-            :counter="counter"
-            :append-icon="appendIcon"
-            :loading="loading"
-            :clearable="clearable"
-            :hint="hint"
-            :persistent-hint="persistentHint"
-
-            :validate-on-blur="validateOnBlur"
-
-            v-on="inputListeners"
-        >
-            <template slot="progress">
-                <slot name="progress"></slot>
-            </template>
-
-        </v-text-field>
+    </v-text-field>
 
 </template>
 
 <script>
 
-import {validacaoMixin} from '../jb-v-mixin-validacao'
+import {validacaoMixin} from '../mixins/jb-v-mixin-validacao'
+import {inputBaseMixin} from '../mixins/jb-v-mixin-input-base'
 import mask from '../jb-v-diretiva-mask'
 
 export default {
-    mixins: [validacaoMixin],
-    props:{
-        value:[String, Number],
-
-        regras:String, mascara:String, limite:String,
-        validarNaCriacao:Boolean,
-
-        /** html */
-        label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, min:Number, max:Number,
-
-        /** vuetify */
-        autofocus:Boolean,
-        counter:{type:[Boolean, Number, String]},
-        appendIcon:String,
-        iconClickAppend:{type:Function, default:v=>(v)},
-        hint:String,
-        persistentHint:Boolean,
-        loading:Boolean,
-        validateOnBlur:Boolean,
-        clearable:Boolean,
-
-    },
+    extends: window.Vue._VTextField,
+    mixins: [validacaoMixin, inputBaseMixin],
     data () {return {
         vmodel: this.value,
-        error_messages:null,
-        validar:false,
     }},
     computed:{
         inputListeners: function () {
@@ -96,12 +52,6 @@ export default {
                     }
                 }
             )
-        },
-        eObrigatorio(){
-            return this.$typeof(this.regras,'object') ? {}.hasOwnProperty.call(this.regras,'required') : this.regras.indexOf('required') > -1
-        },
-        label_comp(){
-            return this.regras && this.label && this.eObrigatorio ? `${this.label} *` : this.label
         },
         vmodel_comp: {
             get(){
@@ -129,24 +79,17 @@ export default {
                 this.vmodel = value
             }
         },
-        vmodelMask(){ return this.mascara },
-        vmodelRules(){
-            return this.validar ? this.executarValidacao(this.regras) : [];
+        vuetify_ref(){
+            return this.ref || 'v-text-field'
         },
     },
-    created(){
-        this.validar = this.validarNaCriacao
-    },
-    watch: {
-        value(v){
-            this.vmodel_comp = v
-        }
+    updated(){
+        let v_textfield = this.$refs[this.vuetify_ref]
+        v_textfield._props.type = this._props.type
+        v_textfield._props.appendIcon = this._props.appendIcon
+        v_textfield._props.value = this._props.value
     },
     methods: {
-        emitInput(value){
-            value = this.pegaValorParaEmit(value)
-            this.$emit('input', value)
-        },
         pegaValorParaEmit(value){
             //configurar como os valores colocados pelo usuario devem ser guardados na variavel
             var regexDinheiro = /\d+|,(\.\d{3})*(,\d+)?/gm;
@@ -171,7 +114,7 @@ export default {
         },
         dataPtbrParaEn(data){
             return data.split('/').reverse().join('-')
-        }
+        },
     },
 
 

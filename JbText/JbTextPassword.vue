@@ -11,12 +11,14 @@
             :placeholder="placeholder"
             :disabled="disabled"
             :readonly="readonly"
-            ref="jbtext"
+            :ref="vuetify_ref"
 
             :append-icon="senha_visivel ? 'visibility' : 'visibility_off'"
 
             @click:append="alternarExibicao"
-            @input="value => this.$emit('input', value)"
+            @input="v => this.$emit('input', v)"
+
+            :key="senha_visivel"
         ></jb-text>
 
 </template>
@@ -28,25 +30,21 @@ export default {
         value:String,
         regras:String, label:String, id:String, type:String, placeholder:String, name:String, disabled:Boolean, readonly:Boolean, min:Number, max:Number,
     },
-    data: function () {
-        return {
-        }
-    },
+    data() { return {
+        vmodel:this.value,
+        senha_visivel:false,
+    }},
     computed:{
-        vmodel(){
-            return this.value
-        },
         label_cp(){
             return this.label || 'Senha'
+        },
+        vuetify_ref(){
+            return this.ref || 'jb-text'
         }
     },
     methods:{
         alternarExibicao(){
             this.senha_visivel = !this.senha_visivel
-            //reenvia o valor para forçar a atualiação do campo e trocar o icone
-            let valor = this.value
-            this.value = ''
-            this.value = valor
         },
     }
 }
